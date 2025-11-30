@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PatchVis Interactive Example</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: #252526;
+      padding: 15px 20px;
+      border-bottom: 1px solid #3e3e42;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    h1 {
+      font-size: 20px;
+      font-weight: 500;
+      color: #cccccc;
+    }
+    .header-toolbar {
+      display: flex;
+      gap: 10px;
+    }
+    .container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+    .sidebar {
+      width: 250px;
+      background: #252526;
+      border-right: 1px solid #3e3e42;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-header {
+      padding: 10px 15px;
+      background: #2d2d30;
+      border-bottom: 1px solid #3e3e42;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #cccccc;
+      letter-spacing: 0.5px;
+    }
+    .module-library {
+      flex: 1;
+      overflow-y: auto;
+    }
+    .module-item {
+      padding: 8px 15px;
+      cursor: pointer;
+      border-bottom: 1px solid #3e3e42;
+      transition: background 0.1s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .module-item:hover {
+      background: #2a2d2e;
+    }
+    .module-name {
+      font-size: 13px;
+      color: #cccccc;
+    }
+    .module-type {
+      font-size: 11px;
+      color: #858585;
+    }
+    .add-btn {
+      padding: 2px 8px;
+      font-size: 11px;
+      background: #0e639c;
+      color: white;
+      border: none;
+      border-radius: 2px;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .module-item:hover .add-btn {
+      opacity: 1;
+    }
+    .add-btn:hover {
+      background: #1177bb;
+    }
+    .sidebar-footer {
+      padding: 10px 15px;
+      border-top: 1px solid #3e3e42;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .editor-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #3e3e42;
+      background: #1e1e1e;
+    }
+    .panel-header {
+      padding: 10px 15px;
+      background: #252526;
+      border-bottom: 1px solid #3e3e42;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .editor-title {
+      font-size: 13px;
+      color: #cccccc;
+    }
+    #yamlEditor {
+      flex: 1;
+      padding: 15px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 13px;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      border: none;
+      resize: none;
+      outline: none;
+      line-height: 1.5;
+    }
+    .preview-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #252526;
+      padding-right: 5px;
+    }
+    .preview-title {
+      font-size: 13px;
+      color: #cccccc;
+    }
+    #output {
+      flex: 1;
+      overflow: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    #output svg {
+      max-width: 100%;
+      max-height: 100%;
+    }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+    }
+    button {
+      padding: 6px 16px;
+      background: #0e639c;
+      color: #ffffff;
+      border: none;
+      border-radius: 2px;
+      cursor: pointer;
+      font-size: 13px;
+      font-family: inherit;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #1177bb;
+    }
+    button:active {
+      background: #0d5a8f;
+    }
+    button.secondary {
+      background: #3e3e42;
+    }
+    button.secondary:hover {
+      background: #505050;
+    }
+    .small-btn {
+      padding: 4px 12px;
+      font-size: 12px;
+    }
+    .error {
+      padding: 15px;
+      background: #5a1d1d;
+      border-left: 4px solid #f48771;
+      margin: 15px;
+      border-radius: 2px;
+      font-family: 'Consolas', monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      color: #f48771;
+    }
+    .info {
+      padding: 10px 15px;
+      background: #2d2d30;
+      border-bottom: 1px solid #3e3e42;
+      font-size: 11px;
+      color: #858585;
+      line-height: 1.5;
+    }
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #0e639c;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 4px;
+      font-size: 13px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      animation: slideIn 0.3s ease-out;
+      z-index: 1000;
+    }
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🎛️ PatchVis Interactive Editor</h1>
+    <div class="header-toolbar">
+      <button id="saveBtn">Save Patch</button>
+      <button id="loadBtn" class="secondary">Load Patch</button>
+    </div>
+  </header>
+  
+  <div class="container">
+    <div class="sidebar">
+      <div class="sidebar-header">Module Library</div>
+      <div class="info">
+        Load module templates from a folder to quickly add them to your patch.
+      </div>
+      <div class="module-library" id="moduleLibrary">
+        <div style="padding: 20px; text-align: center; color: #858585; font-size: 12px;">
+          No modules loaded.<br>Click "Load Library" below.
+        </div>
+      </div>
+      <div class="sidebar-footer">
+        <button id="loadLibraryBtn" class="small-btn">Load Library Folder</button>
+        <button id="saveModuleBtn" class="small-btn secondary">Save Current as Module</button>
+      </div>
+    </div>
+
+    <div class="editor-panel">
+      <div class="panel-header">
+        <span class="editor-title">patch.yaml</span>
+        <div class="toolbar">
+          <button id="renderBtn">Render</button>
+          <button id="resetBtn" class="secondary">Reset</button>
+        </div>
+      </div>
+      <textarea id="yamlEditor" spellcheck="false"></textarea>
+    </div>
+    
+    <div class="preview-panel">
+      <div class="panel-header">
+        <span class="preview-title">Preview</span>
+        <div class="toolbar">
+          <button id="copySvgBtn" class="secondary" style="margin-left: auto;">Copy as PNG</button>
+          <button id="saveSvgBtn" class="secondary">Save SVG</button>
+        </div>
+      </div>
+      <div id="output"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+  <script type="module">
+    import { generateSVGFromConfig } from '../dist/index.mjs';
+
+    const editor = document.getElementById('yamlEditor');
+    const output = document.getElementById('output');
+    const renderBtn = document.getElementById('renderBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const loadBtn = document.getElementById('loadBtn');
+    const loadLibraryBtn = document.getElementById('loadLibraryBtn');
+    const saveModuleBtn = document.getElementById('saveModuleBtn');
+    const saveSvgBtn = document.getElementById('saveSvgBtn');
+    const copySvgBtn = document.getElementById('copySvgBtn');
+    const moduleLibrary = document.getElementById('moduleLibrary');
+
+    let libraryModules = [];  // User-loaded library
+    let builtInModules = [];  // Built-in modules from /modules
+    let defaultYaml = '';
+    let currentSvg = '';
+
+    // Load patch.yaml on startup
+    async function loadDefaultPatch() {
+      try {
+        const response = await fetch('patch.yaml');
+        if (response.ok) {
+          defaultYaml = await response.text();
+          editor.value = defaultYaml;
+        } else {
+          console.warn('Could not load patch.yaml, using empty template');
+          defaultYaml = 'modules:\n  - name: module1\n    definition: VCO\n    position: {x: 0, y: 0}\n\nconnections: []';
+          editor.value = defaultYaml;
+        }
+      } catch (error) {
+        console.error('Error loading patch.yaml:', error);
+        defaultYaml = 'modules:\n  - name: module1\n    definition: VCO\n    position: {x: 0, y: 0}\n\nconnections: []';
+        editor.value = defaultYaml;
+      }
+    }
+
+    // Initialize editor by loading patch.yaml, auto-load library, then render
+    async function initialize() {
+      await loadDefaultPatch();
+      await loadBuiltInModules();
+      await autoLoadLibrary();
+      render();
+    }
+    
+    initialize();
+
+    function render() {
+      const yamlText = editor.value;
+      try {
+        // Parse YAML to check for missing definitions
+        const config = jsyaml.load(yamlText);
+        
+        // Find all definitions referenced by instances
+        const referencedDefs = new Set();
+        if (config.modules && Array.isArray(config.modules)) {
+          config.modules.forEach(module => {
+            if (module.definition) {
+              referencedDefs.add(module.definition);
+            }
+          });
+        }
+        
+        // Check which definitions are missing
+        const existingDefs = new Set();
+        if (config.definitions) {
+          Object.keys(config.definitions).forEach(def => existingDefs.add(def));
+        } else {
+          config.definitions = {};
+        }
+        
+        const missingDefs = Array.from(referencedDefs).filter(def => !existingDefs.has(def));
+        
+        // Auto-add missing definitions from library (check both user and built-in)
+        const allModules = [...libraryModules, ...builtInModules];
+        if (missingDefs.length > 0 && allModules.length > 0) {
+          let modified = false;
+
+          
+          missingDefs.forEach(defName => {
+            const libraryModule = allModules.find(m => m.name === defName);
+            if (libraryModule) {
+              // Parse the library module YAML and add it to config.definitions
+              const moduleDef = jsyaml.load(libraryModule.yaml);
+              config.definitions[defName] = moduleDef;
+              modified = true;
+            }
+          });
+          
+          // If we added definitions, use the config object directly
+          if (modified) {
+            const svg = generateSVGFromConfig(config);
+            currentSvg = svg;
+            output.innerHTML = svg;
+            return;
+          }
+        }
+        
+        const svg = generateSVGFromConfig(config);
+        currentSvg = svg;
+        output.innerHTML = svg;
+      } catch (error) {
+        output.innerHTML = `<div class="error">Error rendering patch:\n\n${error.message}</div>`;
+      }
+    }
+
+    // File System Access API functions
+    async function savePatchToFile() {
+      try {
+        const options = {
+          types: [
+            {
+              description: 'YAML Patch Files',
+              accept: { 'text/yaml': ['.yaml', '.yml'] },
+            },
+          ],
+          suggestedName: 'patch.yaml',
+        };
+        
+        const handle = await window.showSaveFilePicker(options);
+        const writable = await handle.createWritable();
+        await writable.write(editor.value);
+        await writable.close();
+        
+        showToast('Patch saved successfully!');
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error('Error saving file:', err);
+          alert('Error saving file: ' + err.message);
+        }
+      }
+    }
+
+    async function loadPatchFromFile() {
+      try {
+        const options = {
+          types: [
+            {
+              description: 'YAML Patch Files',
+              accept: { 'text/yaml': ['.yaml', '.yml'] },
+            },
+          ],
+          multiple: false,
+        };
+        
+        const [handle] = await window.showOpenFilePicker(options);
+        const file = await handle.getFile();
+        const text = await file.text();
+        
+        editor.value = text;
+        render();
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error('Error loading file:', err);
+          alert('Error loading file: ' + err.message);
+        }
+      }
+    }
+
+    // Load built-in modules from the /modules directory
+    async function loadBuiltInModules() {
+      // List of built-in module files in /modules directory
+      const moduleFiles = [
+        'ENV.yaml', 'LFO.yaml', 'MIXER.yaml', 'VCA.yaml', 'VCF.yaml', 'VCO.yaml'
+      ];
+
+      builtInModules = [];
+      
+      for (const filename of moduleFiles) {
+        try {
+          const response = await fetch(`../modules/${filename}`);
+          if (response.ok) {
+            const text = await response.text();
+            const moduleName = filename.replace(/\.yaml$/, '');
+            
+            // Extract type from YAML
+            let moduleType = 'unknown';
+            const lines = text.split('\n');
+            for (const line of lines) {
+              if (line.trim().startsWith('type:')) {
+                moduleType = line.split(':')[1].trim();
+                break;
+              }
+            }
+            
+            builtInModules.push({
+              name: moduleName,
+              type: moduleType,
+              yaml: text,
+              filename: filename
+            });
+          }
+        } catch (err) {
+          console.warn(`Could not load built-in module ${filename}:`, err);
+        }
+      }
+      
+      renderModuleLibrary();
+    }
+
+    async function loadModuleLibrary() {
+      try {
+        const dirHandle = await window.showDirectoryPicker();
+        
+        // Store the directory handle in IndexedDB for future use
+        await storeDirHandle(dirHandle);
+        
+        await loadModulesFromDirHandle(dirHandle);
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error('Error loading library:', err);
+          alert('Error loading library: ' + err.message);
+        }
+      }
+    }
+
+    async function loadModulesFromDirHandle(dirHandle) {
+      libraryModules = [];
+      
+      for await (const entry of dirHandle.values()) {
+        if (entry.kind === 'file' && (entry.name.endsWith('.yaml') || entry.name.endsWith('.yml'))) {
+          const file = await entry.getFile();
+          const text = await file.text();
+          
+          try {
+            // Parse the YAML to extract module info (definitions don't have 'name')
+            const lines = text.split('\n');
+            let moduleName = entry.name.replace(/\.(yaml|yml)$/, '');
+            let moduleType = 'unknown';
+            
+            // Extract type from YAML
+            for (const line of lines) {
+              if (line.trim().startsWith('type:')) {
+                moduleType = line.split(':')[1].trim();
+                break;
+              }
+            }
+            
+            libraryModules.push({
+              name: moduleName,
+              type: moduleType,
+              yaml: text,
+              filename: entry.name
+            });
+          } catch (e) {
+            console.warn(`Skipping invalid module file: ${entry.name}`, e);
+          }
+        }
+      }
+      
+      renderModuleLibrary();
+      showToast(`Loaded ${libraryModules.length} module(s) from library`);
+    }
+
+    function showToast(message, duration = 3000) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.animation = 'slideIn 0.3s ease-out reverse';
+        setTimeout(() => toast.remove(), 300);
+      }, duration);
+    }
+
+    // IndexedDB functions for storing directory handle
+    async function storeDirHandle(dirHandle) {
+      const db = await openDB();
+      const tx = db.transaction('handles', 'readwrite');
+      const store = tx.objectStore('handles');
+      store.put(dirHandle, 'moduleLibraryDir');
+      return new Promise((resolve, reject) => {
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    }
+
+    async function getDirHandle() {
+      const db = await openDB();
+      const tx = db.transaction('handles', 'readonly');
+      const store = tx.objectStore('handles');
+      const request = store.get('moduleLibraryDir');
+      return new Promise((resolve, reject) => {
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    function openDB() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open('PatchVisDB', 1);
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve(request.result);
+        request.onupgradeneeded = (event) => {
+          const db = event.target.result;
+          if (!db.objectStoreNames.contains('handles')) {
+            db.createObjectStore('handles');
+          }
+        };
+      });
+    }
+
+    // Try to auto-load library on startup
+    async function autoLoadLibrary() {
+      try {
+        const dirHandle = await getDirHandle();
+        if (dirHandle) {
+          // Check if we still have permission
+          const permission = await dirHandle.queryPermission({ mode: 'read' });
+          if (permission === 'granted') {
+            await loadModulesFromDirHandle(dirHandle);
+            console.log('Auto-loaded module library');
+          } else {
+            // Try to request permission - this will prompt the user
+            const newPermission = await dirHandle.requestPermission({ mode: 'read' });
+            if (newPermission === 'granted') {
+              await loadModulesFromDirHandle(dirHandle);
+              console.log('Auto-loaded module library after permission request');
+            }
+          }
+        }
+      } catch (err) {
+        console.log('Could not auto-load library:', err.message);
+      }
+    }
+
+    function renderModuleLibrary() {
+      let html = '';
+      
+      // User library section (only show if modules are loaded)
+      if (libraryModules.length > 0) {
+        html += '<div class="sidebar-header" style="margin-top: 0;">User Library</div>';
+        html += libraryModules.map((module, index) => `
+          <div class="module-item" data-index="${index}" data-source="user">
+            <div>
+              <div class="module-name">${escapeHtml(module.name)}</div>
+              <div class="module-type">${escapeHtml(module.type)}</div>
+            </div>
+            <button class="add-btn" onclick="addModuleToEditor(${index}, 'user')">Add</button>
+          </div>
+        `).join('');
+      }
+      
+      // Built-in modules section
+      if (builtInModules.length > 0) {
+        html += '<div class="sidebar-header" style="margin-top: ' + (libraryModules.length > 0 ? '10px' : '0') + ';">Built-in Modules</div>';
+        html += builtInModules.map((module, index) => `
+          <div class="module-item" data-index="${index}" data-source="builtin">
+            <div>
+              <div class="module-name">${escapeHtml(module.name)}</div>
+              <div class="module-type">${escapeHtml(module.type)}</div>
+            </div>
+            <button class="add-btn" onclick="addModuleToEditor(${index}, 'builtin')">Add</button>
+          </div>
+        `).join('');
+      }
+      
+      // Show message if no modules at all
+      if (libraryModules.length === 0 && builtInModules.length === 0) {
+        html = `
+          <div style="padding: 20px; text-align: center; color: #858585; font-size: 12px;">
+            No modules loaded.<br>Click "Load Library" below.
+          </div>
+        `;
+      }
+      
+      moduleLibrary.innerHTML = html;
+    }
+
+    window.addModuleToEditor = function(index, source = 'user') {
+      const module = source === 'user' ? libraryModules[index] : builtInModules[index];
+      
+      const currentText = editor.value;
+      const lines = currentText.split('\n');
+      
+      // Check if this definition already exists in the definitions section
+      const defName = module.name;
+      const hasDefinition = currentText.includes(`\n  ${defName}:\n`) || currentText.includes(`\ndefinitions:\n  ${defName}:\n`);
+      
+      // Add definition if it doesn't exist
+      if (!hasDefinition) {
+        let defInsertIndex = -1;
+        
+        // Find definitions section or create it
+        for (let i = 0; i < lines.length; i++) {
+          if (lines[i].match(/^definitions:/)) {
+            // Find last line of definitions section
+            defInsertIndex = i;
+            for (let j = i + 1; j < lines.length; j++) {
+              if (lines[j].match(/^[a-z]+:/) && !lines[j].match(/^  /)) {
+                break;
+              }
+              defInsertIndex = j;
+            }
+            break;
+          }
+        }
+        
+        // If no definitions section, create one at the top
+        if (defInsertIndex === -1) {
+          lines.unshift('definitions:');
+          defInsertIndex = 0;
+        }
+        
+        // Add the definition with proper indentation
+        const defLines = module.yaml.split('\n').map(line => '    ' + line);
+        defLines.unshift(`  ${defName}:`);
+        lines.splice(defInsertIndex + 1, 0, ...defLines);
+      }
+      
+      // Now add a module instance
+      let insertLineIndex = 0;
+      let inModules = false;
+      
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.match(/^modules:/)) {
+          inModules = true;
+          continue;
+        }
+        if (inModules && line.match(/^  - name:/)) {
+          insertLineIndex = i;
+        }
+        if (inModules && line.match(/^[a-z]+:/) && !line.match(/^  /)) {
+          break;
+        }
+      }
+      
+      // Find the end of the last module instance
+      if (insertLineIndex > 0) {
+        for (let i = insertLineIndex + 1; i < lines.length; i++) {
+          const line = lines[i];
+          if (line.match(/^  - name:/) || line.match(/^[a-z]+:/)) {
+            insertLineIndex = i - 1;
+            break;
+          }
+          insertLineIndex = i;
+        }
+      } else {
+        // No modules section exists, create one
+        for (let i = 0; i < lines.length; i++) {
+          if (lines[i].match(/^connections:/) || lines[i].match(/^options:/)) {
+            lines.splice(i, 0, '', 'modules:');
+            insertLineIndex = i + 1;
+            break;
+          }
+        }
+        if (insertLineIndex === 0) {
+          lines.push('', 'modules:');
+          insertLineIndex = lines.length - 1;
+        }
+      }
+      
+      // Generate unique instance name
+      let instanceNumber = 1;
+      let uniqueName = defName.toLowerCase() + instanceNumber;
+      while (currentText.includes(`name: ${uniqueName}`)) {
+        instanceNumber++;
+        uniqueName = defName.toLowerCase() + instanceNumber;
+      }
+      
+      // Create module instance with definition reference
+      const instanceYaml = `  - name: ${uniqueName}
+    definition: ${defName}
+    position:
+      x: 0
+      y: 0`;
+      
+      lines.splice(insertLineIndex + 1, 0, instanceYaml);
+      editor.value = lines.join('\n');
+      
+      render();
+    };
+
+    async function saveCurrentAsModule() {
+      try {
+        // Get the definition name first, before any async operations
+        const currentText = editor.value;
+        const lines = currentText.split('\n');
+        
+        // Find all available definitions
+        const availableDefs = [];
+        for (let i = 0; i < lines.length; i++) {
+          const match = lines[i].match(/^  ([A-Z][A-Za-z0-9_]*):\s*$/);
+          if (match) {
+            availableDefs.push(match[1]);
+          }
+        }
+        
+        if (availableDefs.length === 0) {
+          showToast('No definitions found in current patch');
+          return;
+        }
+        
+        // Use the first definition or prompt (we'll get the name after file picker)
+        const selection = availableDefs[0];
+        
+        // Extract the definition (not an instance)
+        let defLines = [];
+        let capturing = false;
+        let baseIndent = 0;
+        
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          // Match definition like "  VCO:"
+          if (line.match(new RegExp(`^  ${selection}:\\s*$`))) {
+            capturing = true;
+            baseIndent = 2; // Definition indent is 2 spaces
+            continue; // Skip the definition name line
+          }
+          
+          if (capturing) {
+            const currentIndent = line.match(/^(\s*)/)[1].length;
+            // Continue while indented more than base, or empty line
+            if (line.trim() === '') {
+              defLines.push('');
+            } else if (currentIndent > baseIndent) {
+              // Remove the base indent (2 spaces)
+              defLines.push(line.substring(baseIndent));
+            } else {
+              // Hit another top-level or definition
+              break;
+            }
+          }
+        }
+        
+        if (defLines.length === 0) {
+          alert(`Definition "${selection}" not found in current patch`);
+          return;
+        }
+        
+        const moduleYaml = defLines.join('\n');
+        
+        const options = {
+          types: [
+            {
+              description: 'YAML Module Files',
+              accept: { 'text/yaml': ['.yaml', '.yml'] },
+            },
+          ],
+          suggestedName: `${selection}.yaml`,
+        };
+        
+        // Show file picker immediately (within user gesture context)
+        const handle = await window.showSaveFilePicker(options);
+        const writable = await handle.createWritable();
+        await writable.write(moduleYaml);
+        await writable.close();
+        
+        showToast('Module definition saved successfully!');
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error('Error saving module:', err);
+          alert('Error saving module: ' + err.message);
+        }
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Save SVG to file
+    async function saveSvgToFile() {
+      if (!currentSvg) {
+        showToast('No SVG to save. Please render first.', 'error');
+        return;
+      }
+
+      try {
+        // Try to get title from current config
+        let suggestedName = 'patch.svg';
+        try {
+          const config = jsyaml.load(editor.value);
+          if (config.title) {
+            // Sanitize title for filename
+            const sanitized = config.title
+              .replace(/[^a-zA-Z0-9\s\-_]/g, '')
+              .replace(/\s+/g, '-')
+              .toLowerCase();
+            suggestedName = sanitized + '.svg';
+          }
+        } catch (e) {
+          // If we can't parse config, just use default name
+        }
+
+        const blob = new Blob([currentSvg], { type: 'image/svg+xml' });
+        const handle = await window.showSaveFilePicker({
+          suggestedName: suggestedName,
+          types: [{
+            description: 'SVG Image',
+            accept: { 'image/svg+xml': ['.svg'] }
+          }]
+        });
+
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+
+        showToast('SVG saved successfully!');
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error('Error saving SVG:', error);
+          showToast('Failed to save SVG: ' + error.message, 'error');
+        }
+      }
+    }
+
+    // Copy SVG to clipboard
+    async function copySvgToClipboard() {
+      if (!currentSvg) {
+        showToast('No Image to copy. Please render first.', 'error');
+        return;
+      }
+
+      try {
+        // Convert SVG to PNG for better compatibility with image editors
+        const img = new Image();
+        const svgBlob = new Blob([currentSvg], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(svgBlob);
+        
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+          img.src = url;
+        });
+
+        // Create canvas and draw the image
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        
+        // Clean up
+        URL.revokeObjectURL(url);
+
+        // Convert canvas to blob and copy to clipboard
+        canvas.toBlob(async (pngBlob) => {
+          try {
+            await navigator.clipboard.write([
+              new ClipboardItem({
+                'image/png': pngBlob
+              })
+            ]);
+            showToast('Image copied to clipboard');
+          } catch (err) {
+            console.error('Error writing to clipboard:', err);
+            showToast('Failed to copy image: ' + err.message, 'error');
+          }
+        }, 'image/png');
+      } catch (error) {
+        console.error('Error copying to clipboard:', error);
+        showToast('Failed to copy image: ' + error.message, 'error');
+      }
+    }
+
+    // Event listeners
+    renderBtn.addEventListener('click', render);
+    
+    resetBtn.addEventListener('click', () => {
+      loadDefaultPatch();
+    });
+
+    saveBtn.addEventListener('click', savePatchToFile);
+    loadBtn.addEventListener('click', loadPatchFromFile);
+    loadLibraryBtn.addEventListener('click', loadModuleLibrary);
+    saveModuleBtn.addEventListener('click', saveCurrentAsModule);
+    saveSvgBtn.addEventListener('click', saveSvgToFile);
+    copySvgBtn.addEventListener('click', copySvgToClipboard);
+
+    // Keyboard shortcut: Ctrl+Enter or Cmd+Enter to render
+    editor.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        render();
+      }
+      // Ctrl+S to save
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        savePatchToFile();
+      }
+    });
+  </script>
+</body>
+</html>

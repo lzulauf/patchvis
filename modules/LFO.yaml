@@ -1,0 +1,15 @@
+type: modulator
+width: 120
+height: 250
+outputs:
+  - sine
+  - square
+  - triangle
+  - random
+knobs:
+  - name: rate
+    value: 0.3
+    position: {x: 40, y: 160}
+  - name: depth
+    value: 0.5
+    position: {x: 80, y: 160}

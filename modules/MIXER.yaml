@@ -1,0 +1,23 @@
+type: utility
+width: 120
+height: 250
+inputs:
+  - in1
+  - in2
+  - in3
+  - in4
+outputs:
+  - mix
+knobs:
+  - name: ch1
+    value: 0.5
+    position: {x: 15, y: 160}
+  - name: ch2
+    value: 0.5
+    position: {x: 45, y: 160}
+  - name: ch3
+    value: 0.5
+    position: {x: 75, y: 160}
+  - name: ch4
+    value: 0.5
+    position: {x: 105, y: 160}

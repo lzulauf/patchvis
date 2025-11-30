@@ -1,0 +1,12 @@
+type: amplifier
+width: 120
+height: 250
+inputs:
+  - in
+  - cv
+outputs:
+  - out
+knobs:
+  - name: level
+    value: 0.8
+    position: {x: 60, y: 160}

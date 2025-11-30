@@ -1,0 +1,8 @@
+  type: midiToCV
+  outputs:
+    - cv_1
+    - gate_1
+    - cv_2
+    - gate_2
+    - mod
+    - clock

@@ -1,0 +1,4 @@
+  type: midiToCV
+  inputs:
+    - out_1
+    - out_2

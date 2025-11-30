@@ -1,0 +1,21 @@
+  type: amplifier
+  width: 120
+  height: 250
+  inputs:
+    - cv
+    - in
+  outputs:
+    - out
+  knobs:
+    - name: shape
+      value: 0
+      radius: 10
+      position: {x: 60, y: 60}
+    - name: offset
+      value: 0
+      radius: 10
+      position: {x: 60, y: 110}
+    - name: level
+      value: 1.0
+      radius: 20
+      position: {x: 60, y: 180}

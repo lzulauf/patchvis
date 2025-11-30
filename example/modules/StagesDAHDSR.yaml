@@ -1,0 +1,33 @@
+  type: envelope
+  inputs: ["level", "gate"]
+  outputs: ["out"]
+  knobs:
+    - name: delay
+      value: 0
+      radius: 8
+      position: {x: 40, y: 155}
+    - name: hold
+      value: 0
+      radius: 8
+      position: {x: 80, y: 155}
+    - name: att
+      radius: 10
+      position: {x: 20, y: 210}
+    - name: dec
+      radius: 10
+      position: {x: 46, y: 210}
+    - name: sus
+      radius: 10
+      position: {x: 74, y: 210}
+    - name: rel
+      radius: 10
+      position: {x: 100, y: 210}
+    - name: att_
+      radius: 8
+      position: {x: 20, y: 100}
+    - name: dec_
+      radius: 8
+      position: {x: 60, y: 100}
+    - name: rel_
+      radius: 8
+      position: {x: 100, y: 100}

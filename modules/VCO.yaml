@@ -1,0 +1,18 @@
+type: oscillator
+width: 120
+height: 250
+outputs:
+  - saw
+  - square
+  - sine
+  - triangle
+knobs:
+  - name: freq
+    value: 0.5
+    position: {x: 20, y: 160}
+  - name: fine
+    value: 0.5
+    position: {x: 60, y: 160}
+  - name: pwm
+    value: 0.5
+    position: {x: 100, y: 160}

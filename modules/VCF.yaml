@@ -1,0 +1,21 @@
+type: filter
+width: 120
+height: 250
+inputs:
+  - in
+  - cv
+  - res_cv
+outputs:
+  - out
+  - bp
+  - hp
+knobs:
+  - name: cutoff
+    value: 0.5
+    position: {x: 20, y: 160}
+  - name: resonance
+    value: 0.3
+    position: {x: 60, y: 160}
+  - name: cv_amt
+    value: 0.5
+    position: {x: 100, y: 160}

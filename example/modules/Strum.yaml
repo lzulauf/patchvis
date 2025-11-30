@@ -1,0 +1,25 @@
+    type: O_C Applet
+    inputs:
+      - trig_1
+      - trig_2
+      - cv_1
+      - cv_2
+    outputs:
+      - out_a
+      - out_b
+    knobs:
+      - name: scale
+        positions: [1, 2, 3, 4, 5, 6, 7, 8]
+        value: 0
+        position: {x: 35, y: 140}
+      - name: root
+        positions: ['c', 'd', 'e', 'f', 'g', 'a', 'b']
+        value: 0
+        position: {x: 85, y: 140}
+      - name: time
+        value: 0.5
+        position: {x: 35, y: 205}
+      - name: length
+        positions: [1, 2, 3, 4, 5, 6]
+        value: 2
+        position: {x: 85, y: 205}

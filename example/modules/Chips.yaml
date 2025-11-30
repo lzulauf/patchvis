@@ -1,0 +1,51 @@
+  type: vco
+  width: 120
+  height: 270
+  inputs:
+    - chip1_tune
+    - chip1_filter
+    - chip2_tune
+    - chip2_width
+    - lfo_reset
+  outputs:
+    - chip1
+    - chip2
+    - lfo1
+    - lfo2
+  knobs:
+    - name: tune_1
+      value: 0
+      radius: 8
+      position: {x: 20, y: 150}
+    - name: filter_1
+      value: 0
+      radius: 8
+      position: {x: 60, y: 150}
+    - name: wave_1
+      value: 0
+      radius: 8
+      position: {x: 100, y: 150}
+    - name: tune_2
+      value: 0
+      radius: 8
+      position: {x: 20, y: 195}
+    - name: width_2
+      value: 0
+      radius: 8
+      position: {x: 60, y: 195}
+    - name: wave_2
+      value: 0
+      radius: 8
+      position: {x: 100, y: 195}
+    - name: rate_lfo
+      value: 0
+      radius: 8
+      position: {x: 20, y: 240}
+    - name: depth_lfo
+      value: 0
+      radius: 8
+      position: {x: 60, y: 240}
+    - name: wave_lfo
+      value: 0
+      radius: 8
+      position: {x: 100, y: 240}
